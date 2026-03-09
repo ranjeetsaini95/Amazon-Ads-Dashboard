@@ -49,3 +49,11 @@ async function loadMetrics(){
   document.getElementById("orders").innerText = orders
 
 }
+
+window.logout = async function(){
+
+  await supabase.auth.signOut()
+
+  window.location.href = "login.html"
+
+}
