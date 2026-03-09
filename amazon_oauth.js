@@ -3,7 +3,7 @@ import { AMAZON_CLIENT_ID } from "./config.js"
 function connectAmazon(){
 
   const redirectUri =
-    "https://ranjeetsaini9599.github.io/amazon-ads-dashboard/callback.html"
+    "https://ranjeetsaini95.github.io/amazon-ads-dashboard/callback.html"
 
   const url =
     "https://www.amazon.com/ap/oa?" +
