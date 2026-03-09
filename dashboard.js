@@ -5,15 +5,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 async function initDashboard(){
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
 
-  if(!user){
-
-    // if not logged in → redirect
+  if(!session){
     window.location.href = "login.html"
     return
-
   }
+
+  console.log("User logged in:", session.user.email)
 
   loadMetrics()
 
