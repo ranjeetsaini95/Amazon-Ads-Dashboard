@@ -1,6 +1,6 @@
 import { AMAZON_CLIENT_ID } from "./config.js"
 
-window.connectAmazon = function(){
+function connectAmazon(){
 
   const redirectUri = window.location.origin + "/callback.html"
 
@@ -15,3 +15,5 @@ window.connectAmazon = function(){
 
   window.location.href = url
 }
+
+window.connectAmazon = connectAmazon
