@@ -62,3 +62,6 @@ window.logout = async function(){
   window.location.href = "login.html"
 
 }
+
+<script type="module" src="amazon_oauth.js"></script>
+<script type="module" src="dashboard.js"></script>
