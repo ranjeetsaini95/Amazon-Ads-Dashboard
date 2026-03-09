@@ -3,36 +3,27 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-window.signup = async function(){
+// SIGNUP
+window.signup = async function () {
 
   const email = document.getElementById("email").value
   const password = document.getElementById("password").value
 
-  try {
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password
+  })
 
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password
-    })
-
-    if (error) {
-      alert("Signup error: " + error.message)
-      return
-    }
-
-    alert("Signup successful! Now login.")
-
-  } catch(err) {
-
-    console.error(err)
-    alert("Unexpected error")
-
+  if (error) {
+    alert("Signup error: " + error.message)
+  } else {
+    alert("Signup successful. Now login.")
   }
 
 }
 
-
-window.login = async function(){
+// LOGIN
+window.login = async function () {
 
   const email = document.getElementById("email").value
   const password = document.getElementById("password").value
@@ -42,12 +33,10 @@ window.login = async function(){
     password: password
   })
 
-  if(error){
+  if (error) {
     alert("Login error: " + error.message)
   } else {
-
     window.location.href = "dashboard.html"
-
   }
 
 }
