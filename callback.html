@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Amazon Connection</title>
+</head>
+
+<body>
+
+<h2>Connecting Amazon Account...</h2>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+
+const code = params.get("code")
+
+if(code){
+
+  console.log("Authorization code:", code)
+
+  document.body.innerHTML =
+  "<h2>Amazon account connected successfully.</h2>" +
+  "<p>Authorization code received.</p>"
+
+}else{
+
+  document.body.innerHTML =
+  "<h2>Amazon connection failed.</h2>"
+
+}
+
+</script>
+
+</body>
+</html>
