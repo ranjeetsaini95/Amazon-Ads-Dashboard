@@ -1,5 +1,4 @@
-const API_URL = "https://YOUR_PROJECT.supabase.co/rest/v1/dashboard_metrics"
-
+const API_URL = "https://bhwwiyrxhvrscnhzvych.supabase.co/rest/v1/dashboard_metrics"
 async function loadDashboard(){
 
 const response = await fetch(API_URL)
