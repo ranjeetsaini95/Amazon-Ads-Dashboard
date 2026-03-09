@@ -1,8 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
-'https://YOUR_PROJECT.supabase.co',
-'YOUR_ANON_KEY'
+'https://bhwwiyrxhvrscnhzvych.supabase.co',
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJod3dpeXJ4aHZyc2NuaHp2eWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MzM0NTgsImV4cCI6MjA4ODMwOTQ1OH0.6Cl-U5HuzFs2A7leRBBmz7514RtPEtCcWJLcUrbLnV4'
 )
 
 async function signup(){
