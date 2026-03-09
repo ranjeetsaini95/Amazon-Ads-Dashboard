@@ -9,24 +9,56 @@
 
 <h2>Connecting Amazon Account...</h2>
 
+<div id="status"></div>
+
 <script>
 
 const params = new URLSearchParams(window.location.search)
-
 const code = params.get("code")
 
-if(code){
+const statusDiv = document.getElementById("status")
 
-  console.log("Authorization code:", code)
+if(!code){
 
-  document.body.innerHTML =
-  "<h2>Amazon account connected successfully.</h2>" +
-  "<p>Authorization code received.</p>"
+  statusDiv.innerHTML = "Amazon connection failed."
 
 }else{
 
-  document.body.innerHTML =
-  "<h2>Amazon connection failed.</h2>"
+  console.log("Authorization code:", code)
+
+  statusDiv.innerHTML = "Authorization received. Connecting..."
+
+  // Send code to backend
+  fetch("https://YOUR_BACKEND_URL/exchange-token", {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      code: code
+    })
+
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    console.log("Token exchange response:", data)
+
+    statusDiv.innerHTML =
+      "Amazon account connected successfully."
+
+  })
+  .catch(err => {
+
+    console.error(err)
+
+    statusDiv.innerHTML =
+      "Error connecting Amazon account."
+
+  })
 
 }
 
