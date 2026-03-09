@@ -52,7 +52,12 @@ async function loadMetrics(){
 
 window.logout = async function(){
 
-  await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut()
+
+  if(error){
+    alert("Logout error: " + error.message)
+    return
+  }
 
   window.location.href = "login.html"
 
