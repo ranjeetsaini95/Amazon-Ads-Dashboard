@@ -1,2 +1,3 @@
 export const SUPABASE_URL = "https://bhwwiyrxhvrscnhzvych.supabase.co"
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJod3dpeXJ4aHZyc2NuaHp2eWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MzM0NTgsImV4cCI6MjA4ODMwOTQ1OH0.6Cl-U5HuzFs2A7leRBBmz7514RtPEtCcWJLcUrbLnV4"
+export const AMAZON_CLIENT_ID = "amzn1.application-oa2-client.1f110209a7034756822689ca6def12f7"
