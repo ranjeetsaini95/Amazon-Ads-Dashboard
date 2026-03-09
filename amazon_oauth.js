@@ -2,7 +2,8 @@ import { AMAZON_CLIENT_ID } from "./config.js"
 
 function connectAmazon(){
 
-  const redirectUri = window.location.origin + "/amazon-ads-dashboard/callback.html"
+  const redirectUri =
+    "https://ranjeetsaini9599.github.io/amazon-ads-dashboard/callback.html"
 
   const url =
     "https://www.amazon.com/ap/oa?" +
@@ -11,17 +12,10 @@ function connectAmazon(){
     "&response_type=code" +
     "&redirect_uri=" + encodeURIComponent(redirectUri)
 
-  console.log("Redirecting to Amazon:", url)
+  console.log("Redirecting to Amazon OAuth:", url)
 
   window.location.href = url
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-
-  const btn = document.getElementById("connectAmazonBtn")
-
-  if(btn){
-    btn.addEventListener("click", connectAmazon)
-  }
-
-})
+// expose function to HTML
+window.connectAmazon = connectAmazon
