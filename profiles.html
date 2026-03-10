@@ -7,11 +7,13 @@
 
 <body>
 
-<h2>Select Profiles to Activate</h2>
+<h2>Select Amazon Profiles</h2>
 
 <div id="profiles"></div>
 
-<button id="activate">Activate Selected</button>
+<br>
+
+<button id="activate">Activate Selected Profiles</button>
 
 <script type="module">
 
@@ -22,7 +24,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const { data: { session } } = await supabase.auth.getSession()
 
-// get client
+// find client
 const { data: client } = await supabase
   .from("clients")
   .select("id")
@@ -31,7 +33,7 @@ const { data: client } = await supabase
 
 const client_id = client.id
 
-// fetch profiles
+// fetch profiles from database
 const { data: profiles } = await supabase
   .from("amazon_profiles")
   .select("*")
@@ -58,6 +60,13 @@ document.getElementById("activate").onclick = async () => {
 
   const checked = document.querySelectorAll("input:checked")
 
+  // reset old selections
+  await supabase
+    .from("amazon_profiles")
+    .update({ is_active: false })
+    .eq("client_id", client_id)
+
+  // activate selected profiles
   for (const box of checked) {
 
     await supabase
@@ -68,6 +77,8 @@ document.getElementById("activate").onclick = async () => {
   }
 
   alert("Profiles activated!")
+
+  window.location.href = "dashboard.html"
 
 }
 
