@@ -16,9 +16,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ENV VARIABLES
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+
 AMAZON_CLIENT_ID = os.environ["AMAZON_CLIENT_ID"]
 AMAZON_CLIENT_SECRET = os.environ["AMAZON_CLIENT_SECRET"]
 
@@ -42,9 +42,9 @@ def exchange_token(data: AuthRequest):
 
     try:
 
-        # -------------------------------
-        # Find client record
-        # -------------------------------
+        # ---------------------------
+        # 1️⃣ Find client
+        # ---------------------------
         client = supabase.table("clients") \
             .select("id") \
             .eq("user_id", data.user_id) \
@@ -53,9 +53,9 @@ def exchange_token(data: AuthRequest):
 
         client_id = client.data["id"]
 
-        # -------------------------------
-        # Exchange auth code for token
-        # -------------------------------
+        # ---------------------------
+        # 2️⃣ Exchange auth code
+        # ---------------------------
         token_response = requests.post(
             "https://api.amazon.com/auth/o2/token",
             data={
@@ -73,10 +73,19 @@ def exchange_token(data: AuthRequest):
             return {"error": token}
 
         access_token = token["access_token"]
+        refresh_token = token["refresh_token"]
 
-        # -------------------------------
-        # Fetch Amazon advertising profiles
-        # -------------------------------
+        # ---------------------------
+        # 3️⃣ Save refresh token
+        # ---------------------------
+        supabase.table("amazon_tokens").upsert({
+            "client_id": client_id,
+            "refresh_token": refresh_token
+        }).execute()
+
+        # ---------------------------
+        # 4️⃣ Fetch profiles
+        # ---------------------------
         profiles_response = requests.get(
             "https://advertising-api.amazon.com/v2/profiles",
             headers={
@@ -87,12 +96,12 @@ def exchange_token(data: AuthRequest):
 
         profiles = profiles_response.json()
 
-        # -------------------------------
-        # Save profiles to Supabase
-        # -------------------------------
+        # ---------------------------
+        # 5️⃣ Insert profiles
+        # ---------------------------
         for profile in profiles:
 
-            supabase.table("amazon_profiles").insert({
+            supabase.table("amazon_profiles").upsert({
                 "client_id": client_id,
                 "profile_id": profile["profileId"],
                 "country_code": profile.get("countryCode"),
@@ -100,12 +109,13 @@ def exchange_token(data: AuthRequest):
                 "currency": profile.get("currencyCode"),
                 "account_entity_id": profile.get("accountInfo", {}).get("id"),
                 "account_name": profile.get("accountInfo", {}).get("name"),
-                "timezone": profile.get("timezone")
+                "timezone": profile.get("timezone"),
+                "is_active": False
             }).execute()
 
         return {
             "status": "success",
-            "profiles_imported": len(profiles)
+            "profiles_found": len(profiles)
         }
 
     except Exception as e:
