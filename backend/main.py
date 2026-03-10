@@ -102,34 +102,34 @@ def exchange_token(data: AuthRequest):
         # ---------------------------
         # 5️⃣ Insert profiles
         # ---------------------------
-for profile in profiles:
-
-    country = profile.get("countryCode")
-
-    # Region detection
-    if country in ["US", "CA", "MX", "BR"]:
-        region = "NA"
-    elif country in ["UK", "DE", "FR", "IT", "ES", "NL", "SE", "PL"]:
-        region = "EU"
-    else:
-        region = "FE"
-
-   try:
-
-    supabase.table("amazon_profiles").upsert({
-        "client_id": client_id,
-        "profile_id": profile["profileId"],
-        "country_code": country,
-        "marketplace": country,
-        "currency": profile.get("currencyCode"),
-        "account_entity_id": profile.get("accountInfo", {}).get("id"),
-        "account_name": profile.get("accountInfo", {}).get("name"),
-        "timezone": profile.get("timezone"),
-        "region": region,
-        "is_active": False
-    }, on_conflict="profile_id").execute()
-
-    except Exception as insert_error:
+    for profile in profiles:
+    
+        country = profile.get("countryCode")
+    
+        # Region detection
+        if country in ["US", "CA", "MX", "BR"]:
+            region = "NA"
+        elif country in ["UK", "DE", "FR", "IT", "ES", "NL", "SE", "PL"]:
+            region = "EU"
+        else:
+            region = "FE"
+    
+       try:
+    
+        supabase.table("amazon_profiles").upsert({
+            "client_id": client_id,
+            "profile_id": profile["profileId"],
+            "country_code": country,
+            "marketplace": country,
+            "currency": profile.get("currencyCode"),
+            "account_entity_id": profile.get("accountInfo", {}).get("id"),
+            "account_name": profile.get("accountInfo", {}).get("name"),
+            "timezone": profile.get("timezone"),
+            "region": region,
+            "is_active": False
+        }, on_conflict="profile_id").execute()
+    
+        except Exception as insert_error:
     
         print("PROFILE INSERT ERROR:", insert_error)
         return {
