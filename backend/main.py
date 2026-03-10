@@ -114,6 +114,8 @@ for profile in profiles:
     else:
         region = "FE"
 
+   try:
+
     supabase.table("amazon_profiles").upsert({
         "client_id": client_id,
         "profile_id": profile["profileId"],
@@ -125,8 +127,11 @@ for profile in profiles:
         "timezone": profile.get("timezone"),
         "region": region,
         "is_active": False
-    }).on_conflict="profile_id").execute()
+    }, on_conflict="profile_id").execute()
 
+    except Exception as insert_error:
+    
+        print("PROFILE INSERT ERROR:", insert_error)
         return {
             "status": "success",
             "profiles_found": len(profiles)
