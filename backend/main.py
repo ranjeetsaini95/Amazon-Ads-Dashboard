@@ -53,20 +53,18 @@ def exchange_token(data: AuthRequest):
 
     try:
 
-        # -----------------------------
         # 1️⃣ Find client
-        # -----------------------------
         client = supabase.table("clients") \
             .select("id") \
             .eq("user_id", data.user_id) \
-            .single() \
             .execute()
 
-        client_id = client.data["id"]
+        if not client.data:
+            return {"error": "Client not found"}
 
-        # -----------------------------
+        client_id = client.data[0]["id"]
+
         # 2️⃣ Exchange auth code
-        # -----------------------------
         token_response = requests.post(
             "https://api.amazon.com/auth/o2/token",
             data={
@@ -84,21 +82,16 @@ def exchange_token(data: AuthRequest):
         refresh_token = token.get("refresh_token")
 
         if not access_token:
-            print("TOKEN ERROR:", token)
             return {"error": token}
 
-        # -----------------------------
         # 3️⃣ Save refresh token
-        # -----------------------------
         if refresh_token:
             supabase.table("amazon_tokens").upsert({
                 "client_id": client_id,
                 "refresh_token": refresh_token
             }).execute()
 
-        # -----------------------------
-        # 4️⃣ Fetch Amazon profiles
-        # -----------------------------
+        # 4️⃣ Fetch profiles
         profiles_response = requests.get(
             "https://advertising-api.amazon.com/v2/profiles",
             headers={
@@ -107,18 +100,18 @@ def exchange_token(data: AuthRequest):
             }
         )
 
+        if profiles_response.status_code != 200:
+            return {"error": profiles_response.text}
+
         profiles = profiles_response.json()
 
         print("AMAZON PROFILES:", profiles)
 
-        # -----------------------------
-        # 5️⃣ Insert / Update profiles
-        # -----------------------------
+        # 5️⃣ Insert profiles
         for profile in profiles:
 
             country = profile.get("countryCode")
 
-            # Region detection
             if country in ["US", "CA", "MX", "BR"]:
                 region = "NA"
             elif country in ["UK", "DE", "FR", "IT", "ES", "NL", "SE", "PL"]:
@@ -127,22 +120,23 @@ def exchange_token(data: AuthRequest):
                 region = "FE"
 
             try:
-
-                supabase.table("amazon_profiles").upsert({
-                    "client_id": client_id,
-                    "profile_id": profile["profileId"],
-                    "country_code": country,
-                    "marketplace": country,
-                    "currency": profile.get("currencyCode"),
-                    "account_entity_id": profile.get("accountInfo", {}).get("id"),
-                    "account_name": profile.get("accountInfo", {}).get("name"),
-                    "timezone": profile.get("timezone"),
-                    "region": region,
-                    "is_active": False
-                }, on_conflict="profile_id").execute()
+                supabase.table("amazon_profiles").upsert(
+                    {
+                        "client_id": client_id,
+                        "profile_id": profile["profileId"],
+                        "country_code": country,
+                        "marketplace": country,
+                        "currency": profile.get("currencyCode"),
+                        "account_entity_id": profile.get("accountInfo", {}).get("id"),
+                        "account_name": profile.get("accountInfo", {}).get("name"),
+                        "timezone": profile.get("timezone"),
+                        "region": region,
+                        "is_active": False
+                    },
+                    on_conflict="profile_id"
+                ).execute()
 
             except Exception as insert_error:
-
                 print("PROFILE INSERT ERROR:", insert_error)
 
         return {
