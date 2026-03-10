@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>Select Amazon Profiles</title>
+<title>Select Amazon Profiles</title>
 </head>
 
 <body>
@@ -16,7 +15,6 @@
 <button id="activate">Activate Selected Profiles</button>
 
 <script type="module">
-<script type="module">
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
@@ -24,10 +22,6 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const { data: { session } } = await supabase.auth.getSession()
-
-console.log("Logged user:", session.user.id)
-
-</script>
 
 // find client
 const { data: clientData } = await supabase
@@ -42,7 +36,7 @@ if (!clientData || clientData.length === 0) {
 
 const client_id = clientData[0].id
 
-// fetch profiles from database
+// fetch profiles
 const { data: profiles } = await supabase
   .from("amazon_profiles")
   .select("*")
@@ -69,13 +63,18 @@ document.getElementById("activate").onclick = async () => {
 
   const checked = document.querySelectorAll("input:checked")
 
-  // reset old selections
+  if (checked.length === 0) {
+    alert("Please select at least one profile")
+    return
+  }
+
+  // deactivate all
   await supabase
     .from("amazon_profiles")
     .update({ is_active: false })
     .eq("client_id", client_id)
 
-  // activate selected profiles
+  // activate selected
   for (const box of checked) {
 
     await supabase
@@ -94,5 +93,4 @@ document.getElementById("activate").onclick = async () => {
 </script>
 
 </body>
-
 </html>
