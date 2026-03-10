@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Select Amazon Profiles</title>
+</head>
+
+<body>
+
+<h2>Select Profiles to Activate</h2>
+
+<div id="profiles"></div>
+
+<button id="activate">Activate Selected</button>
+
+<script type="module">
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+const { data: { session } } = await supabase.auth.getSession()
+
+// get client
+const { data: client } = await supabase
+  .from("clients")
+  .select("id")
+  .eq("user_id", session.user.id)
+  .single()
+
+const client_id = client.id
+
+// fetch profiles
+const { data: profiles } = await supabase
+  .from("amazon_profiles")
+  .select("*")
+  .eq("client_id", client_id)
+
+const container = document.getElementById("profiles")
+
+profiles.forEach(profile => {
+
+  const div = document.createElement("div")
+
+  div.innerHTML = `
+    <label>
+      <input type="checkbox" value="${profile.profile_id}">
+      ${profile.account_name} (${profile.country_code})
+    </label>
+  `
+
+  container.appendChild(div)
+
+})
+
+document.getElementById("activate").onclick = async () => {
+
+  const checked = document.querySelectorAll("input:checked")
+
+  for (const box of checked) {
+
+    await supabase
+      .from("amazon_profiles")
+      .update({ is_active: true })
+      .eq("profile_id", box.value)
+
+  }
+
+  alert("Profiles activated!")
+
+}
+
+</script>
+
+</body>
+
+</html>
