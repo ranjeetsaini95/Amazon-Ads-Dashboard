@@ -125,7 +125,7 @@ for profile in profiles:
         "timezone": profile.get("timezone"),
         "region": region,
         "is_active": False
-    }).execute()
+    }).on_conflict="profile_id").execute()
 
         return {
             "status": "success",
