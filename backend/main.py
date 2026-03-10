@@ -99,19 +99,30 @@ def exchange_token(data: AuthRequest):
         # ---------------------------
         # 5️⃣ Insert profiles
         # ---------------------------
-        for profile in profiles:
+for profile in profiles:
 
-            supabase.table("amazon_profiles").upsert({
-                "client_id": client_id,
-                "profile_id": profile["profileId"],
-                "country_code": profile.get("countryCode"),
-                "marketplace": profile.get("countryCode"),
-                "currency": profile.get("currencyCode"),
-                "account_entity_id": profile.get("accountInfo", {}).get("id"),
-                "account_name": profile.get("accountInfo", {}).get("name"),
-                "timezone": profile.get("timezone"),
-                "is_active": False
-            }).execute()
+    country = profile.get("countryCode")
+
+    # Region detection
+    if country in ["US", "CA", "MX", "BR"]:
+        region = "NA"
+    elif country in ["UK", "DE", "FR", "IT", "ES", "NL", "SE", "PL"]:
+        region = "EU"
+    else:
+        region = "FE"
+
+    supabase.table("amazon_profiles").upsert({
+        "client_id": client_id,
+        "profile_id": profile["profileId"],
+        "country_code": country,
+        "marketplace": country,
+        "currency": profile.get("currencyCode"),
+        "account_entity_id": profile.get("accountInfo", {}).get("id"),
+        "account_name": profile.get("accountInfo", {}).get("name"),
+        "timezone": profile.get("timezone"),
+        "region": region,
+        "is_active": False
+    }).execute()
 
         return {
             "status": "success",
