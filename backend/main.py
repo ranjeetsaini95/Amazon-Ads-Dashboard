@@ -10,7 +10,9 @@ app = FastAPI()
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://ranjeetsaini95.github.io"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,9 +34,11 @@ class AuthRequest(BaseModel):
     user_id: str
 
 
+from fastapi.responses import Response
+
 @app.options("/exchange-token")
 def options_exchange():
-    return {"status": "ok"}
+    return Response(status_code=200)
 
 
 @app.post("/exchange-token")
