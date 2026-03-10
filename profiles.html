@@ -15,28 +15,38 @@
 <button id="activate">Activate Selected Profiles</button>
 console.log("SESSION USER:", session.user.id)
 <script type="module">
-console.log("SESSION USER:", session.user.id)
+<script type="module">
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// 1️⃣ get session FIRST
 const { data: { session } } = await supabase.auth.getSession()
 
-// find client
+if (!session) {
+  alert("You are not logged in")
+  window.location.href = "index.html"
+}
+
+// 2️⃣ now you can use session
+console.log("SESSION USER:", session.user.id)
+
+// 3️⃣ find client
 const { data: clientData } = await supabase
   .from("clients")
   .select("id")
   .eq("user_id", session.user.id)
 
 if (!clientData || clientData.length === 0) {
-  alert("Client not found. Please login again.")
+  alert("Client not found")
   throw new Error("Client not found")
 }
 
 const client_id = clientData[0].id
 
-// fetch profiles
+// 4️⃣ load profiles
 const { data: profiles } = await supabase
   .from("amazon_profiles")
   .select("*")
@@ -59,6 +69,7 @@ profiles.forEach(profile => {
 
 })
 
+// 5️⃣ activate profiles
 document.getElementById("activate").onclick = async () => {
 
   const checked = document.querySelectorAll("input:checked")
@@ -68,13 +79,11 @@ document.getElementById("activate").onclick = async () => {
     return
   }
 
-  // deactivate all
   await supabase
     .from("amazon_profiles")
     .update({ is_active: false })
     .eq("client_id", client_id)
 
-  // activate selected
   for (const box of checked) {
 
     await supabase
@@ -91,6 +100,5 @@ document.getElementById("activate").onclick = async () => {
 }
 
 </script>
-
 </body>
 </html>
