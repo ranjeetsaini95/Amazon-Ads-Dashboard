@@ -59,7 +59,8 @@ const response = await fetch(
     method: "POST",
     headers: {
       "Authorization": "token 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",
-      "Accept": "application/vnd.github+json"
+      "Accept": "application/vnd.github+json",
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       ref: "main"
