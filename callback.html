@@ -52,7 +52,7 @@ if (!code) {
     if (result.error) {
       statusDiv.innerHTML = "Error: " + JSON.stringify(result.error)
     } else {
-      statusDiv.innerHTML = "Amazon account connected successfully."
+      window.location.href = "profiles.html"
     }
 
   } catch (error) {
