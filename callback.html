@@ -9,9 +9,14 @@
 
 <h2>Connecting Amazon Account...</h2>
 
-<div id="status"></div>
+<div id="status">Waiting for authorization...</div>
 
-<script>
+<script type="module">
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const params = new URLSearchParams(window.location.search)
 const code = params.get("code")
@@ -26,39 +31,43 @@ if(!code){
 
   console.log("Authorization code:", code)
 
-  statusDiv.innerHTML = "Authorization received. Connecting..."
+  statusDiv.innerHTML = "Saving authorization..."
 
-  // Send code to backend
-  fetch("https://YOUR_BACKEND_URL/exchange-token", {
+  const { data: { session } } = await supabase.auth.getSession()
 
-    method: "POST",
+  if(!session){
+    statusDiv.innerHTML = "User session not found."
+    throw new Error("No user session")
+  }
 
-    headers: {
-      "Content-Type": "application/json"
-    },
-
-    body: JSON.stringify({
-      code: code
+  await supabase
+    .from("amazon_auth_codes")
+    .insert({
+      user_id: session.user.id,
+      auth_code: code
     })
 
-  })
-  .then(res => res.json())
-  .then(data => {
+  statusDiv.innerHTML = "Authorization saved. Starting token exchange..."
 
-    console.log("Token exchange response:", data)
+  /*
+  Trigger GitHub Action worker
+  */
 
-    statusDiv.innerHTML =
-      "Amazon account connected successfully."
+  await fetch(
+    "https://api.github.com/repos/ranjeetsaini95/amazon-ads-dashboard/actions/workflows/exchange_token.yml/dispatches",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer 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",
+        "Accept": "application/vnd.github+json"
+      },
+      body: JSON.stringify({
+        ref: "main"
+      })
+    }
+  )
 
-  })
-  .catch(err => {
-
-    console.error(err)
-
-    statusDiv.innerHTML =
-      "Error connecting Amazon account."
-
-  })
+  statusDiv.innerHTML = "Token exchange started. You can return to the dashboard."
 
 }
 
