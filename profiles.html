@@ -25,13 +25,17 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const { data: { session } } = await supabase.auth.getSession()
 
 // find client
-const { data: client } = await supabase
+const { data: clientData } = await supabase
   .from("clients")
   .select("id")
   .eq("user_id", session.user.id)
-  .single()
 
-const client_id = client.id
+if (!clientData || clientData.length === 0) {
+  alert("Client not found. Please login again.")
+  throw new Error("Client not found")
+}
+
+const client_id = clientData[0].id
 
 // fetch profiles from database
 const { data: profiles } = await supabase
