@@ -9,7 +9,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://ranjeetsaini95.github.io",
+        "http://localhost:5500",
+        "*"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -72,3 +76,6 @@ def exchange_token(data: AuthRequest):
         }).execute()
 
     return {"profiles_imported": len(profiles)}
+    @app.options("/exchange-token")
+def options_exchange():
+    return {"status": "ok"}
