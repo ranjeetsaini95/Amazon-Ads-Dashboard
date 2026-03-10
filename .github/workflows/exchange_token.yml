@@ -14,7 +14,7 @@ jobs:
         run: pip install requests supabase
 
       - name: Run worker
-        run: python workers/exchange_token_worker.py
+        run: python workers/workers/exchange_token_worker.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
