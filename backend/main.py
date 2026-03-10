@@ -19,7 +19,6 @@ app.add_middleware(
 # ENV VARIABLES
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
-
 AMAZON_CLIENT_ID = os.environ["AMAZON_CLIENT_ID"]
 AMAZON_CLIENT_SECRET = os.environ["AMAZON_CLIENT_SECRET"]
 
@@ -43,7 +42,20 @@ def exchange_token(data: AuthRequest):
 
     try:
 
+        # -------------------------------
+        # Find client record
+        # -------------------------------
+        client = supabase.table("clients") \
+            .select("id") \
+            .eq("user_id", data.user_id) \
+            .single() \
+            .execute()
+
+        client_id = client.data["id"]
+
+        # -------------------------------
         # Exchange auth code for token
+        # -------------------------------
         token_response = requests.post(
             "https://api.amazon.com/auth/o2/token",
             data={
@@ -62,7 +74,9 @@ def exchange_token(data: AuthRequest):
 
         access_token = token["access_token"]
 
+        # -------------------------------
         # Fetch Amazon advertising profiles
+        # -------------------------------
         profiles_response = requests.get(
             "https://advertising-api.amazon.com/v2/profiles",
             headers={
@@ -73,11 +87,13 @@ def exchange_token(data: AuthRequest):
 
         profiles = profiles_response.json()
 
+        # -------------------------------
         # Save profiles to Supabase
+        # -------------------------------
         for profile in profiles:
 
             supabase.table("amazon_profiles").insert({
-                "client_id": data.user_id,
+                "client_id": client_id,
                 "profile_id": profile["profileId"],
                 "country_code": profile.get("countryCode"),
                 "marketplace": profile.get("countryCode"),
