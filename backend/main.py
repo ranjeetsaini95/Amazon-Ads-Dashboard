@@ -76,6 +76,6 @@ def exchange_token(data: AuthRequest):
         }).execute()
 
     return {"profiles_imported": len(profiles)}
-    @app.options("/exchange-token")
+@app.options("/exchange-token")
 def options_exchange():
     return {"status": "ok"}
