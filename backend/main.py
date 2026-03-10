@@ -4,10 +4,12 @@ from pydantic import BaseModel
 import requests
 import os
 from supabase import create_client
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 app = FastAPI()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -17,6 +19,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.options("/{full_path:path}")
+async def options_handler(full_path: str):
+    return Response(status_code=200)
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
@@ -32,13 +38,6 @@ supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 class AuthRequest(BaseModel):
     code: str
     user_id: str
-
-
-from fastapi.responses import Response
-
-@app.options("/exchange-token")
-def options_exchange():
-    return Response(status_code=200)
 
 
 @app.post("/exchange-token")
