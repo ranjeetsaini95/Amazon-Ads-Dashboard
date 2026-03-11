@@ -34,14 +34,17 @@ if (!session) {
 console.log("SESSION USER:", session.user.id)
 
 // 2️⃣ Get client
-const { data: clientData } = await supabase
+const { data: clientData, error } = await supabase
   .from("clients")
-  .select("id")
+  .select("*")
   .eq("user_id", session.user.id)
+
+console.log("CLIENT QUERY RESULT:", clientData)
+console.log("CLIENT QUERY ERROR:", error)
 
 if (!clientData || clientData.length === 0) {
   alert("Client not found")
-  throw new Error("Client not found")
+  return
 }
 
 const client_id = clientData[0].id
