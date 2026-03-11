@@ -32,7 +32,7 @@ if (!session) {
 }
 
 console.log("SESSION USER:", session.user.id)
-
+console.log("CLIENT ID:", client_id)
 // 2️⃣ Find client row
 const { data: clientData, error: clientError } = await supabase
   .from("clients")
