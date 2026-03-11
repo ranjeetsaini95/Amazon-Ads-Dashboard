@@ -13,19 +13,30 @@
 
 <body>
 
+<!-- TOP BAR -->
+
 <div class="topbar">
 
-<div>
+<div class="left">
 
-<select id="accountSwitcher"></select>
-<button id="refreshBtn">Refresh</button>
+<h2 class="logo">Ads Analytics</h2>
+
+<select id="accountSwitcher" class="account-switcher"></select>
 
 </div>
 
-<div>
+<div class="right">
+
+<select id="datePreset">
+
+<option value="today">Today</option>
+<option value="yesterday">Yesterday</option>
+<option value="7">Last 7 Days</option>
+<option value="30" selected>Last 30 Days</option>
+
+</select>
 
 <input type="date" id="startDate">
-
 <input type="date" id="endDate">
 
 <button id="refreshBtn">Refresh</button>
@@ -34,41 +45,85 @@
 
 </div>
 
+
+<!-- MAIN CONTENT -->
+
 <div class="container">
+
+<!-- KPI CARDS -->
 
 <div class="kpi-grid">
 
 <div class="kpi-card">
-<div>Sales</div>
+<div class="kpi-title">Sales</div>
 <div id="sales" class="kpi-value">$0</div>
 </div>
 
 <div class="kpi-card">
-<div>Spend</div>
+<div class="kpi-title">Spend</div>
 <div id="spend" class="kpi-value">$0</div>
 </div>
 
 <div class="kpi-card">
-<div>ACOS</div>
+<div class="kpi-title">ACOS</div>
 <div id="acos" class="kpi-value">0%</div>
 </div>
 
 <div class="kpi-card">
-<div>TACOS</div>
+<div class="kpi-title">TACOS</div>
 <div id="tacos" class="kpi-value">0%</div>
 </div>
 
 </div>
 
-<div class="chart">
 
-<h3>Performance Chart</h3>
+<!-- CHART AREA -->
 
-<div id="chartArea">Chart will load here</div>
+<div class="chart-card">
+
+<h3>Performance</h3>
+
+<div id="chartArea">
+Chart will load here
+</div>
+
+</div>
+
+
+<!-- CAMPAIGN TABLE -->
+
+<div class="table-card">
+
+<h3>Campaign Performance</h3>
+
+<table id="campaignTable">
+
+<thead>
+
+<tr>
+<th>Campaign</th>
+<th>Spend</th>
+<th>Sales</th>
+<th>ACOS</th>
+<th>Clicks</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td colspan="5">No data yet</td>
+</tr>
+
+</tbody>
+
+</table>
 
 </div>
 
 </div>
+
 
 <script type="module" src="./js/dashboard.js"></script>
 
