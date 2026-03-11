@@ -1,10 +1,11 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js"
-import { setActiveProfile } from "./context.js"
+import { setActiveProfile, getActiveProfile } from "./context.js"
 
 console.log("🚀 Dashboard script loaded")
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
 
 async function loadDashboard(){
 
@@ -19,7 +20,7 @@ if(!session){
 
 alert("Please login again")
 
-window.location.href="../index.html"
+window.location.href = "../index.html"
 
 return
 
@@ -28,6 +29,7 @@ return
 const userId = session.user.id
 
 console.log("USER ID:", userId)
+
 
 
 /* -----------------------------
@@ -44,7 +46,7 @@ const { data:clientData, error:clientError } = await supabase
 console.log("CLIENT DATA:", clientData)
 console.error("CLIENT ERROR:", clientError)
 
-if(!clientData || clientData.length===0){
+if(!clientData || clientData.length === 0){
 
 alert("Client not found")
 
@@ -55,6 +57,7 @@ return
 const clientId = clientData[0].id
 
 console.log("CLIENT ID:", clientId)
+
 
 
 /* -----------------------------
@@ -74,7 +77,7 @@ console.error("PROFILE ERROR:", profileError)
 
 const switcher = document.getElementById("accountSwitcher")
 
-if(!profiles || profiles.length===0){
+if(!profiles || profiles.length === 0){
 
 console.warn("⚠️ No active profiles found")
 
@@ -85,11 +88,12 @@ return
 }
 
 
+
 /* -----------------------------
 POPULATE ACCOUNT SWITCHER
 ------------------------------ */
 
-profiles.forEach(profile=>{
+profiles.forEach(profile => {
 
 console.log("Adding profile:", profile)
 
@@ -104,21 +108,35 @@ switcher.appendChild(option)
 })
 
 
+
 /* -----------------------------
 SET DEFAULT ACTIVE PROFILE
 ------------------------------ */
 
-const firstProfile = profiles[0].profile_id
+let activeProfile = getActiveProfile()
 
-setActiveProfile(firstProfile)
+console.log("Stored active profile:", activeProfile)
 
-console.log("Default active profile:", firstProfile)
+if(!activeProfile){
+
+activeProfile = profiles[0].profile_id
+
+setActiveProfile(activeProfile)
+
+console.log("Default profile set:", activeProfile)
+
+}
+
+switcher.value = activeProfile
+
+
 
 }
 
 
+
 /* -----------------------------
-ACCOUNT SWITCHING
+ACCOUNT SWITCHER CHANGE
 ------------------------------ */
 
 document.getElementById("accountSwitcher").addEventListener("change",(e)=>{
@@ -127,9 +145,10 @@ const profileId = e.target.value
 
 console.log("🔁 Profile switched:", profileId)
 
-localStorage.setItem("active_profile", profileId)
+setActiveProfile(profileId)
 
 })
+
 
 
 /* -----------------------------
@@ -140,11 +159,12 @@ document.getElementById("refreshBtn").addEventListener("click",()=>{
 
 console.log("🔄 Refresh clicked")
 
-const profile = localStorage.getItem("active_profile")
+const profile = getActiveProfile()
 
 console.log("ACTIVE PROFILE:", profile)
 
 })
+
 
 
 loadDashboard()
