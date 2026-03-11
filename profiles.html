@@ -24,7 +24,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // 1️⃣ Get logged in user
 const { data: { session } } = await supabase.auth.getSession()
-
+console.log("SESSION:", session)
+console.log("SESSION USER ID:", session.user.id)
 if (!session) {
   alert("Please login again")
   window.location.href = "index.html"
