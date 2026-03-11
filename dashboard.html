@@ -3,11 +3,13 @@
 
 <head>
 
-<title>Amazon Ads Dashboard</title>
+<title>Ads Analytics Dashboard</title>
 
 <link rel="icon" href="data:,">
 
 <link rel="stylesheet" href="./css/dashboard.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -21,7 +23,7 @@
 
 <h2 class="logo">Ads Analytics</h2>
 
-<select id="accountSwitcher" class="account-switcher"></select>
+<select id="accountSwitcher"></select>
 
 </div>
 
@@ -46,8 +48,6 @@
 </div>
 
 
-<!-- MAIN CONTENT -->
-
 <div class="container">
 
 <!-- KPI CARDS -->
@@ -65,6 +65,11 @@
 </div>
 
 <div class="kpi-card">
+<div class="kpi-title">Orders</div>
+<div id="orders" class="kpi-value">0</div>
+</div>
+
+<div class="kpi-card">
 <div class="kpi-title">ACOS</div>
 <div id="acos" class="kpi-value">0%</div>
 </div>
@@ -74,18 +79,21 @@
 <div id="tacos" class="kpi-value">0%</div>
 </div>
 
+<div class="kpi-card">
+<div class="kpi-title">Clicks</div>
+<div id="clicks" class="kpi-value">0</div>
+</div>
+
 </div>
 
 
-<!-- CHART AREA -->
+<!-- PERFORMANCE CHART -->
 
 <div class="chart-card">
 
 <h3>Performance</h3>
 
-<div id="chartArea">
-Chart will load here
-</div>
+<canvas id="performanceChart"></canvas>
 
 </div>
 
@@ -101,11 +109,14 @@ Chart will load here
 <thead>
 
 <tr>
+
 <th>Campaign</th>
 <th>Spend</th>
 <th>Sales</th>
 <th>ACOS</th>
 <th>Clicks</th>
+<th>Orders</th>
+
 </tr>
 
 </thead>
@@ -113,7 +124,7 @@ Chart will load here
 <tbody>
 
 <tr>
-<td colspan="5">No data yet</td>
+<td colspan="6">No data yet</td>
 </tr>
 
 </tbody>
