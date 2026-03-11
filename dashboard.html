@@ -2,21 +2,74 @@
 <html>
 
 <head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="style.css">
+
+<title>Amazon Ads Dashboard</title>
+
+<link rel="icon" href="data:,">
+
+<link rel="stylesheet" href="./css/dashboard.css">
+
 </head>
 
 <body>
 
-<h1>Amazon Ads Dashboard</h1>
-<button onclick="logout()">Logout</button>
-<button onclick="connectAmazon()">Connect Amazon Account</button>
+<div class="topbar">
 
-<h3>Sales: <span id="sales"></span></h3>
-<h3>Spend: <span id="spend"></span></h3>
-<h3>Orders: <span id="orders"></span></h3>
+<div>
 
-<script type="module" src="amazon_oauth.js"></script>
-<script type="module" src="dashboard.js"></script>
+<select id="accountSwitcher" class="account-switcher"></select>
+
+</div>
+
+<div>
+
+<input type="date" id="startDate">
+
+<input type="date" id="endDate">
+
+<button id="refreshBtn">Refresh</button>
+
+</div>
+
+</div>
+
+<div class="container">
+
+<div class="kpi-grid">
+
+<div class="kpi-card">
+<div>Sales</div>
+<div id="sales" class="kpi-value">$0</div>
+</div>
+
+<div class="kpi-card">
+<div>Spend</div>
+<div id="spend" class="kpi-value">$0</div>
+</div>
+
+<div class="kpi-card">
+<div>ACOS</div>
+<div id="acos" class="kpi-value">0%</div>
+</div>
+
+<div class="kpi-card">
+<div>TACOS</div>
+<div id="tacos" class="kpi-value">0%</div>
+</div>
+
+</div>
+
+<div class="chart">
+
+<h3>Performance Chart</h3>
+
+<div id="chartArea">Chart will load here</div>
+
+</div>
+
+</div>
+
+<script type="module" src="./js/dashboard.js"></script>
+
 </body>
 </html>
