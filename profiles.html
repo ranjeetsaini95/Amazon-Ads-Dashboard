@@ -21,12 +21,18 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
+console.log("🚀 Initializing Supabase")
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 async function loadProfiles() {
 
-  // 1️⃣ Get session
-  const { data: { session } } = await supabase.auth.getSession()
+  console.log("🔎 Fetching session")
+
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+  console.log("SESSION:", session)
+  console.error("SESSION ERROR:", sessionError)
 
   if (!session) {
     alert("Please login again")
@@ -36,14 +42,19 @@ async function loadProfiles() {
 
   console.log("SESSION USER:", session.user.id)
 
-  // 2️⃣ Find client
+  // -----------------------
+  // Fetch client
+  // -----------------------
+
+  console.log("🔎 Fetching client")
+
   const { data: clientData, error: clientError } = await supabase
     .from("clients")
     .select("id")
     .eq("user_id", session.user.id)
 
-  console.log("CLIENT QUERY RESULT:", clientData)
-  console.log("CLIENT QUERY ERROR:", clientError)
+  console.log("CLIENT DATA:", clientData)
+  console.error("CLIENT ERROR:", clientError)
 
   if (!clientData || clientData.length === 0) {
     alert("Client not found")
@@ -52,23 +63,33 @@ async function loadProfiles() {
 
   const client_id = clientData[0].id
 
-  // 3️⃣ Load Amazon profiles
-  const { data: profileData, error: profileError } = await supabase
+  console.log("CLIENT ID:", client_id)
+
+  // -----------------------
+  // Fetch profiles
+  // -----------------------
+
+  console.log("🔎 Fetching Amazon profiles")
+
+  const { data: profiles, error: profileError } = await supabase
     .from("amazon_profiles")
     .select("*")
     .eq("client_id", client_id)
 
-  console.log("PROFILES:", profileData)
-  console.log("PROFILE ERROR:", profileError)
+  console.log("PROFILES:", profiles)
+  console.error("PROFILE ERROR:", profileError)
 
   const container = document.getElementById("profiles")
 
-  if (!profileData || profileData.length === 0) {
+  if (!profiles || profiles.length === 0) {
+    console.warn("⚠️ No profiles returned")
     container.innerHTML = "<p>No profiles found</p>"
     return
   }
 
-  profileData.forEach(profile => {
+  profiles.forEach(profile => {
+
+    console.log("Rendering profile:", profile)
 
     const div = document.createElement("div")
 
@@ -83,31 +104,47 @@ async function loadProfiles() {
 
   })
 
-  // 4️⃣ Activate profiles button
+  // -----------------------
+  // Activate profiles
+  // -----------------------
+
   document.getElementById("activate").addEventListener("click", async () => {
 
+    console.log("Activate button clicked")
+
     const checked = document.querySelectorAll("input:checked")
+
+    console.log("SELECTED CHECKBOXES:", checked)
 
     if (checked.length === 0) {
       alert("Please select at least one profile")
       return
     }
 
-    // deactivate previous selections
-    await supabase
+    console.log("Resetting all profiles")
+
+    const { error: resetError } = await supabase
       .from("amazon_profiles")
       .update({ is_active: false })
       .eq("client_id", client_id)
 
-    // activate selected
+    console.error("RESET ERROR:", resetError)
+
     for (const box of checked) {
 
-      await supabase
+      console.log("Activating profile:", box.value)
+
+      const { data, error } = await supabase
         .from("amazon_profiles")
         .update({ is_active: true })
         .eq("profile_id", box.value)
 
+      console.log("UPDATE RESULT:", data)
+      console.error("UPDATE ERROR:", error)
+
     }
+
+    console.log("Profiles activation complete")
 
     alert("Profiles activated successfully")
 
@@ -117,7 +154,6 @@ async function loadProfiles() {
 
 }
 
-// run page
 loadProfiles()
 
 </script>
