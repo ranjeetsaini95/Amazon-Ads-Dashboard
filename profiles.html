@@ -23,96 +23,102 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// 1️⃣ Get logged‑in session
-const { data: { session } } = await supabase.auth.getSession()
+async function loadProfiles() {
 
-if (!session) {
-  alert("Please login again")
-  window.location.href = "index.html"
-}
+  // 1️⃣ Get session
+  const { data: { session } } = await supabase.auth.getSession()
 
-console.log("SESSION USER:", session.user.id)
-  
-// 2️⃣ Find client row
-const { data: clientData, error: clientError } = await supabase
-  .from("clients")
-  .select("id")
-  .eq("user_id", session.user.id)
-
-console.log("CLIENT QUERY RESULT:", clientData)
-console.log("CLIENT QUERY ERROR:", clientError)
-
-if (!clientData || clientData.length === 0) {
-  alert("Client not found")
-  throw new Error("Client not found")
-}
-
-const client_id = clientData[0].id
-console.log("CLIENT ID:", client_id)
-
-// THEN use it
-const { data: profiles } = await supabase
-  .from("amazon_profiles")
-  .select("*")
-  .eq("client_id", client_id)
-
-// 3️⃣ Load Amazon profiles
-const { data: profiles, error: profileError } = await supabase
-  .from("amazon_profiles")
-  .select("*")
-  .eq("client_id", session.user.id)
-
-console.log("PROFILES:", profiles)
-console.log("PROFILE ERROR:", profileError)
-
-const container = document.getElementById("profiles")
-
-profiles.forEach(profile => {
-
-  const div = document.createElement("div")
-
-  div.innerHTML = `
-    <label>
-      <input type="checkbox" value="${profile.profile_id}">
-      ${profile.account_name} (${profile.country_code})
-    </label>
-  `
-
-  container.appendChild(div)
-
-})
-
-// 4️⃣ Activate button
-document.getElementById("activate").addEventListener("click", async () => {
-
-  const checked = document.querySelectorAll("input:checked")
-
-  if (checked.length === 0) {
-    alert("Please select at least one profile")
+  if (!session) {
+    alert("Please login again")
+    window.location.href = "index.html"
     return
   }
 
-  // deactivate previous selections
-  await supabase
-    .from("amazon_profiles")
-    .update({ is_active: false })
-    .eq("client_id", client_id)
+  console.log("SESSION USER:", session.user.id)
 
-  // activate selected profiles
-  for (const box of checked) {
+  // 2️⃣ Find client
+  const { data: clientData, error: clientError } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("user_id", session.user.id)
 
-    await supabase
-      .from("amazon_profiles")
-      .update({ is_active: true })
-      .eq("profile_id", box.value)
+  console.log("CLIENT QUERY RESULT:", clientData)
+  console.log("CLIENT QUERY ERROR:", clientError)
 
+  if (!clientData || clientData.length === 0) {
+    alert("Client not found")
+    return
   }
 
-  alert("Profiles activated successfully")
+  const client_id = clientData[0].id
 
-  window.location.href = "dashboard.html"
+  // 3️⃣ Load Amazon profiles
+  const { data: profileData, error: profileError } = await supabase
+    .from("amazon_profiles")
+    .select("*")
+    .eq("client_id", client_id)
 
-})
+  console.log("PROFILES:", profileData)
+  console.log("PROFILE ERROR:", profileError)
+
+  const container = document.getElementById("profiles")
+
+  if (!profileData || profileData.length === 0) {
+    container.innerHTML = "<p>No profiles found</p>"
+    return
+  }
+
+  profileData.forEach(profile => {
+
+    const div = document.createElement("div")
+
+    div.innerHTML = `
+      <label>
+        <input type="checkbox" value="${profile.profile_id}">
+        ${profile.account_name} (${profile.country_code})
+      </label>
+    `
+
+    container.appendChild(div)
+
+  })
+
+  // 4️⃣ Activate profiles button
+  document.getElementById("activate").addEventListener("click", async () => {
+
+    const checked = document.querySelectorAll("input:checked")
+
+    if (checked.length === 0) {
+      alert("Please select at least one profile")
+      return
+    }
+
+    // deactivate previous selections
+    await supabase
+      .from("amazon_profiles")
+      .update({ is_active: false })
+      .eq("client_id", client_id)
+
+    // activate selected
+    for (const box of checked) {
+
+      await supabase
+        .from("amazon_profiles")
+        .update({ is_active: true })
+        .eq("profile_id", box.value)
+
+    }
+
+    alert("Profiles activated successfully")
+
+    window.location.href = "dashboard.html"
+
+  })
+
+}
+
+// run page
+loadProfiles()
 
 </script>
 
