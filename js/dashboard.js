@@ -15,16 +15,12 @@ LOAD DASHBOARD
 
 async function loadDashboard(){
 
-console.log("Checking session")
+const { data, error } = await supabase
+.from("campaign_reports")
+.select("*")
+.limit(5)
 
-const { data:{ session } } = await supabase.auth.getSession()
-
-if(!session){
-
-window.location.href="../index.html"
-return
-
-}
+console.log("TEST DATA:", data)
 
 const userId = session.user.id
 
