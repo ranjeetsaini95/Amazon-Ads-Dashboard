@@ -2,12 +2,16 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js"
 import { setActiveProfile, getActiveProfile } from "./context.js"
 
-console.log("🚀 Dashboard loaded")
+console.log("🚀 Dashboard initialized")
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-let chart
+let chart = null
 
+
+/* ---------------------------
+LOAD DASHBOARD
+---------------------------- */
 
 async function loadDashboard(){
 
@@ -24,8 +28,10 @@ return
 
 const userId = session.user.id
 
+console.log("USER",userId)
 
-/* CLIENT */
+
+/* GET CLIENT */
 
 const { data:clientData } = await supabase
 .from("clients")
@@ -34,8 +40,10 @@ const { data:clientData } = await supabase
 
 const clientId = clientData[0].id
 
+console.log("CLIENT",clientId)
 
-/* PROFILES */
+
+/* LOAD PROFILES */
 
 const { data:profiles } = await supabase
 .from("amazon_profiles")
@@ -43,14 +51,17 @@ const { data:profiles } = await supabase
 .eq("client_id",clientId)
 .eq("is_active",true)
 
+console.log("ACTIVE PROFILES",profiles)
+
 const switcher=document.getElementById("accountSwitcher")
+
+switcher.innerHTML=""
 
 profiles.forEach(profile=>{
 
 const option=document.createElement("option")
 
 option.value=profile.profile_id
-
 option.text=profile.account_name+" ("+profile.country_code+")"
 
 switcher.appendChild(option)
@@ -70,26 +81,22 @@ setActiveProfile(activeProfile)
 
 switcher.value=activeProfile
 
-loadData()
+console.log("ACTIVE PROFILE LOADED",activeProfile)
+
+loadDashboardData()
 
 }
 
 
+/* ---------------------------
+LOAD DATA FROM SUPABASE
+---------------------------- */
 
-/* LOAD DATA */
-
-async function loadData(){
-
-console.log("Loading dashboard data")
+async function loadDashboardData(){
 
 const profileId=getActiveProfile()
 
-const startDate=document.getElementById("startDate").value
-const endDate=document.getElementById("endDate").value
-
-console.log("PROFILE",profileId)
-console.log("DATE RANGE",startDate,endDate)
-
+console.log("Fetching data for profile",profileId)
 
 const { data, error } = await supabase
 .from("campaign_reports")
@@ -98,12 +105,12 @@ const { data, error } = await supabase
 
 if(error){
 
-console.error("DB ERROR",error)
+console.error("DATABASE ERROR",error)
 return
 
 }
 
-console.log("REPORT DATA",data)
+console.log("DATA RECEIVED",data.length,"rows")
 
 updateKPI(data)
 updateChart(data)
@@ -113,7 +120,9 @@ updateCampaignTable(data)
 
 
 
-/* KPI */
+/* ---------------------------
+KPI CARDS
+---------------------------- */
 
 function updateKPI(data){
 
@@ -140,11 +149,15 @@ document.getElementById("clicks").innerText=clicks
 document.getElementById("acos").innerText=acos.toFixed(2)+"%"
 document.getElementById("tacos").innerText="--"
 
+console.log("KPI updated")
+
 }
 
 
 
-/* CHART */
+/* ---------------------------
+PERFORMANCE CHART
+---------------------------- */
 
 function updateChart(data){
 
@@ -160,8 +173,8 @@ grouped[date]={sales:0,spend:0}
 
 }
 
-grouped[date].sales+=Number(row.sales_7d || 0)
-grouped[date].spend+=Number(row.cost || 0)
+grouped[date].sales+=Number(row.sales_7d||0)
+grouped[date].spend+=Number(row.cost||0)
 
 })
 
@@ -183,36 +196,34 @@ chart=new Chart(ctx,{
 type:"line",
 
 data:{
-
 labels:labels,
-
 datasets:[
-
 {
 label:"Sales",
 data:sales,
 borderColor:"#4CAF50",
 tension:0.3
 },
-
 {
 label:"Spend",
 data:spend,
 borderColor:"#FF9800",
 tension:0.3
 }
-
 ]
-
 }
 
 })
 
+console.log("Chart updated")
+
 }
 
 
 
-/* CAMPAIGN TABLE */
+/* ---------------------------
+CAMPAIGN TABLE
+---------------------------- */
 
 function updateCampaignTable(data){
 
@@ -254,44 +265,55 @@ const acos=c.sales>0?(c.spend/c.sales)*100:0
 const row=document.createElement("tr")
 
 row.innerHTML=`
-
 <td>${c.name}</td>
 <td>$${c.spend.toFixed(2)}</td>
 <td>$${c.sales.toFixed(2)}</td>
 <td>${acos.toFixed(2)}%</td>
 <td>${c.clicks}</td>
 <td>${c.orders}</td>
-
 `
 
 tbody.appendChild(row)
 
 })
 
+console.log("Campaign table updated")
+
 }
 
 
 
-/* SWITCH ACCOUNT */
+/* ---------------------------
+PROFILE SWITCH
+---------------------------- */
 
 document.getElementById("accountSwitcher").addEventListener("change",(e)=>{
 
-setActiveProfile(e.target.value)
+const profileId=e.target.value
 
-loadData()
+console.log("Profile switched to",profileId)
+
+setActiveProfile(profileId)
+
+/* reload dashboard data */
+
+loadDashboardData()
 
 })
 
 
 
-/* REFRESH */
+/* ---------------------------
+REFRESH BUTTON
+---------------------------- */
 
 document.getElementById("refreshBtn").addEventListener("click",()=>{
 
-loadData()
+console.log("Manual refresh triggered")
+
+loadDashboardData()
 
 })
-
 
 
 loadDashboard()
