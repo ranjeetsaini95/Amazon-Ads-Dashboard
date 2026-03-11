@@ -32,7 +32,7 @@ if (!session) {
 }
 
 console.log("SESSION USER:", session.user.id)
-console.log("CLIENT ID:", client_id)
+  
 // 2️⃣ Find client row
 const { data: clientData, error: clientError } = await supabase
   .from("clients")
@@ -48,6 +48,13 @@ if (!clientData || clientData.length === 0) {
 }
 
 const client_id = clientData[0].id
+console.log("CLIENT ID:", client_id)
+
+// THEN use it
+const { data: profiles } = await supabase
+  .from("amazon_profiles")
+  .select("*")
+  .eq("client_id", client_id)
 
 // 3️⃣ Load Amazon profiles
 const { data: profiles, error: profileError } = await supabase
