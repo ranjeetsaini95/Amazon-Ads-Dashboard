@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js"
+import { setActiveProfile } from "./context.js"
 
 console.log("🚀 Dashboard script loaded")
 
@@ -109,7 +110,7 @@ SET DEFAULT ACTIVE PROFILE
 
 const firstProfile = profiles[0].profile_id
 
-localStorage.setItem("active_profile", firstProfile)
+setActiveProfile(firstProfile)
 
 console.log("Default active profile:", firstProfile)
 
