@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <title>Select Amazon Profiles</title>
 </head>
@@ -13,7 +14,7 @@
 <br>
 
 <button id="activate">Activate Selected Profiles</button>
-console.log("SESSION USER:", session.user.id)
+
 <script type="module">
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
@@ -21,18 +22,17 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// 1️⃣ get session FIRST
+// 1️⃣ Get logged in user
 const { data: { session } } = await supabase.auth.getSession()
 
 if (!session) {
-  alert("You are not logged in")
+  alert("Please login again")
   window.location.href = "index.html"
 }
 
-// 2️⃣ now you can use session
 console.log("SESSION USER:", session.user.id)
 
-// 3️⃣ find client
+// 2️⃣ Get client
 const { data: clientData } = await supabase
   .from("clients")
   .select("id")
@@ -45,7 +45,7 @@ if (!clientData || clientData.length === 0) {
 
 const client_id = clientData[0].id
 
-// 4️⃣ load profiles
+// 3️⃣ Load profiles
 const { data: profiles } = await supabase
   .from("amazon_profiles")
   .select("*")
@@ -68,8 +68,8 @@ profiles.forEach(profile => {
 
 })
 
-// 5️⃣ activate profiles
-document.getElementById("activate").onclick = async () => {
+// 4️⃣ Activate button
+document.getElementById("activate").addEventListener("click", async () => {
 
   const checked = document.querySelectorAll("input:checked")
 
@@ -78,11 +78,13 @@ document.getElementById("activate").onclick = async () => {
     return
   }
 
+  // deactivate old profiles
   await supabase
     .from("amazon_profiles")
     .update({ is_active: false })
     .eq("client_id", client_id)
 
+  // activate selected
   for (const box of checked) {
 
     await supabase
@@ -92,12 +94,13 @@ document.getElementById("activate").onclick = async () => {
 
   }
 
-  alert("Profiles activated!")
+  alert("Profiles activated successfully!")
 
   window.location.href = "dashboard.html"
 
-}
+})
 
 </script>
+
 </body>
 </html>
