@@ -6,30 +6,23 @@ console.log("🚀 Dashboard loaded")
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+let chart
 
 
 async function loadDashboard(){
 
-console.log("🔎 Checking session")
+console.log("Checking session")
 
-const { data:{ session }, error } = await supabase.auth.getSession()
-
-console.log("SESSION",session)
+const { data:{ session } } = await supabase.auth.getSession()
 
 if(!session){
 
-alert("Login required")
-
 window.location.href="../index.html"
-
 return
 
 }
 
 const userId = session.user.id
-
-console.log("USER ID",userId)
-
 
 
 /* CLIENT */
@@ -39,10 +32,7 @@ const { data:clientData } = await supabase
 .select("id")
 .eq("user_id",userId)
 
-console.log("CLIENT DATA",clientData)
-
 const clientId = clientData[0].id
-
 
 
 /* PROFILES */
@@ -52,8 +42,6 @@ const { data:profiles } = await supabase
 .select("*")
 .eq("client_id",clientId)
 .eq("is_active",true)
-
-console.log("ACTIVE PROFILES",profiles)
 
 const switcher=document.getElementById("accountSwitcher")
 
@@ -70,7 +58,6 @@ switcher.appendChild(option)
 })
 
 
-
 let activeProfile=getActiveProfile()
 
 if(!activeProfile){
@@ -83,65 +70,75 @@ setActiveProfile(activeProfile)
 
 switcher.value=activeProfile
 
-console.log("ACTIVE PROFILE",activeProfile)
-
-
-
-loadChart()
-
-loadMockKPI()
-
-loadMockTable()
+loadData()
 
 }
 
 
 
-/* ACCOUNT SWITCH */
+/* LOAD DATA */
 
-document.getElementById("accountSwitcher").addEventListener("change",(e)=>{
+async function loadData(){
 
-const profileId=e.target.value
+console.log("Loading dashboard data")
 
-console.log("PROFILE SWITCHED",profileId)
+const profileId=getActiveProfile()
 
-setActiveProfile(profileId)
+const startDate=document.getElementById("startDate").value
+const endDate=document.getElementById("endDate").value
+
+console.log("PROFILE",profileId)
+console.log("DATE RANGE",startDate,endDate)
+
+
+const { data, error } = await supabase
+.from("campaign_reports")
+.select("*")
+.eq("profile_id",profileId)
+
+if(error){
+
+console.error("DB ERROR",error)
+return
+
+}
+
+console.log("REPORT DATA",data)
+
+updateKPI(data)
+updateChart(data)
+updateCampaignTable(data)
+
+}
+
+
+
+/* KPI */
+
+function updateKPI(data){
+
+let sales=0
+let spend=0
+let orders=0
+let clicks=0
+
+data.forEach(row=>{
+
+sales+=Number(row.sales_7d || 0)
+spend+=Number(row.cost || 0)
+orders+=Number(row.orders_7d || 0)
+clicks+=Number(row.clicks || 0)
 
 })
 
+const acos = sales>0 ? (spend/sales)*100 : 0
 
-
-/* REFRESH */
-
-document.getElementById("refreshBtn").addEventListener("click",()=>{
-
-console.log("REFRESH CLICKED")
-
-loadChart()
-
-loadMockKPI()
-
-})
-
-
-
-/* KPI MOCK DATA */
-
-function loadMockKPI(){
-
-console.log("Loading KPI data")
-
-document.getElementById("sales").innerText="$12,430"
-
-document.getElementById("spend").innerText="$3,200"
-
-document.getElementById("orders").innerText="210"
-
-document.getElementById("acos").innerText="25.7%"
-
-document.getElementById("tacos").innerText="9.8%"
-
-document.getElementById("clicks").innerText="5,300"
+document.getElementById("sales").innerText="$"+sales.toFixed(2)
+document.getElementById("spend").innerText="$"+spend.toFixed(2)
+document.getElementById("orders").innerText=orders
+document.getElementById("clicks").innerText=clicks
+document.getElementById("acos").innerText=acos.toFixed(2)+"%"
+document.getElementById("tacos").innerText="--"
 
 }
 
@@ -149,32 +146,58 @@ document.getElementById("clicks").innerText="5,300"
 
 /* CHART */
 
-function loadChart(){
+function updateChart(data){
 
-console.log("Loading chart")
+const grouped={}
+
+data.forEach(row=>{
+
+const date=row.report_date
+
+if(!grouped[date]){
+
+grouped[date]={sales:0,spend:0}
+
+}
+
+grouped[date].sales+=Number(row.sales_7d || 0)
+grouped[date].spend+=Number(row.cost || 0)
+
+})
+
+const labels=Object.keys(grouped).sort()
+
+const sales=labels.map(d=>grouped[d].sales)
+const spend=labels.map(d=>grouped[d].spend)
 
 const ctx=document.getElementById("performanceChart")
 
-new Chart(ctx,{
+if(chart){
+
+chart.destroy()
+
+}
+
+chart=new Chart(ctx,{
 
 type:"line",
 
 data:{
 
-labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+labels:labels,
 
 datasets:[
 
 {
 label:"Sales",
-data:[120,190,300,250,320,280,350],
+data:sales,
 borderColor:"#4CAF50",
 tension:0.3
 },
 
 {
 label:"Spend",
-data:[80,110,150,140,170,160,200],
+data:spend,
 borderColor:"#FF9800",
 tension:0.3
 }
@@ -189,30 +212,85 @@ tension:0.3
 
 
 
-/* TABLE */
+/* CAMPAIGN TABLE */
 
-function loadMockTable(){
+function updateCampaignTable(data){
 
-console.log("Loading campaign table")
+const campaigns={}
+
+data.forEach(row=>{
+
+const id=row.campaign_id
+
+if(!campaigns[id]){
+
+campaigns[id]={
+
+name:row.campaign_name,
+sales:0,
+spend:0,
+orders:0,
+clicks:0
+
+}
+
+}
+
+campaigns[id].sales+=Number(row.sales_7d||0)
+campaigns[id].spend+=Number(row.cost||0)
+campaigns[id].orders+=Number(row.orders_7d||0)
+campaigns[id].clicks+=Number(row.clicks||0)
+
+})
 
 const tbody=document.querySelector("#campaignTable tbody")
 
 tbody.innerHTML=""
 
+Object.values(campaigns).forEach(c=>{
+
+const acos=c.sales>0?(c.spend/c.sales)*100:0
+
 const row=document.createElement("tr")
 
 row.innerHTML=`
-<td>Auto Campaign</td>
-<td>$120</td>
-<td>$500</td>
-<td>24%</td>
-<td>300</td>
-<td>40</td>
+
+<td>${c.name}</td>
+<td>$${c.spend.toFixed(2)}</td>
+<td>$${c.sales.toFixed(2)}</td>
+<td>${acos.toFixed(2)}%</td>
+<td>${c.clicks}</td>
+<td>${c.orders}</td>
+
 `
 
 tbody.appendChild(row)
 
+})
+
 }
+
+
+
+/* SWITCH ACCOUNT */
+
+document.getElementById("accountSwitcher").addEventListener("change",(e)=>{
+
+setActiveProfile(e.target.value)
+
+loadData()
+
+})
+
+
+
+/* REFRESH */
+
+document.getElementById("refreshBtn").addEventListener("click",()=>{
+
+loadData()
+
+})
 
 
 
