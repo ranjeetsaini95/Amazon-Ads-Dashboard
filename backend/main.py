@@ -92,18 +92,31 @@ def exchange_token(data: AuthRequest):
             }).execute()
 
         # 4️⃣ Fetch profiles
-        profiles_response = requests.get(
-            "https://advertising-api.amazon.com/v2/profiles",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Amazon-Advertising-API-ClientId": AMAZON_CLIENT_ID
-            }
-        )
-
-        if profiles_response.status_code != 200:
-            return {"error": profiles_response.text}
-
-        profiles = profiles_response.json()
+        profiles = []
+        next_token = None
+        
+        while True:
+        
+            params = {}
+            if next_token:
+                params["nextToken"] = next_token
+        
+            response = requests.get(
+                "https://advertising-api.amazon.com/v2/profiles",
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Amazon-Advertising-API-ClientId": AMAZON_CLIENT_ID
+                },
+                params=params
+            )
+        
+            data = response.json()
+            profiles.extend(data)
+        
+            next_token = response.headers.get("nextToken")
+        
+            if not next_token:
+                break
 
         print("AMAZON PROFILES:", profiles)
 
