@@ -93,31 +93,28 @@ def exchange_token(data: AuthRequest):
 
         # 4️⃣ Fetch profiles
         profiles = []
-        next_token = None
+
+        regions = [
+            "https://advertising-api.amazon.com",
+            "https://advertising-api-eu.amazon.com",
+            "https://advertising-api-fe.amazon.com"
+        ]
         
-        while True:
-        
-            params = {}
-            if next_token:
-                params["nextToken"] = next_token
+        for endpoint in regions:
         
             response = requests.get(
-                "https://advertising-api.amazon.com/v2/profiles",
+                f"{endpoint}/v2/profiles",
                 headers={
                     "Authorization": f"Bearer {access_token}",
                     "Amazon-Advertising-API-ClientId": AMAZON_CLIENT_ID
-                },
-                params=params
+                }
             )
         
-            data = response.json()
-            profiles.extend(data)
+            if response.status_code == 200:
+                region_profiles = response.json()
+                profiles.extend(region_profiles)
         
-            next_token = response.headers.get("nextToken")
-        
-            if not next_token:
-                break
-
+        print("TOTAL AMAZON PROFILES:", len(profiles))
         print("AMAZON PROFILES:", profiles)
 
         # 5️⃣ Insert profiles
