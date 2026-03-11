@@ -2,25 +2,25 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "../config.js"
 import { setActiveProfile, getActiveProfile } from "./context.js"
 
-console.log("🚀 Dashboard script loaded")
+console.log("🚀 Dashboard loaded")
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
 
 
 async function loadDashboard(){
 
 console.log("🔎 Checking session")
 
-const { data:{ session }, error:sessionError } = await supabase.auth.getSession()
+const { data:{ session }, error } = await supabase.auth.getSession()
 
-console.log("SESSION:", session)
-console.error("SESSION ERROR:", sessionError)
+console.log("SESSION",session)
 
 if(!session){
 
-alert("Please login again")
+alert("Login required")
 
-window.location.href = "../index.html"
+window.location.href="../index.html"
 
 return
 
@@ -28,80 +28,42 @@ return
 
 const userId = session.user.id
 
-console.log("USER ID:", userId)
+console.log("USER ID",userId)
 
 
 
-/* -----------------------------
-FETCH CLIENT
------------------------------- */
+/* CLIENT */
 
-console.log("🔎 Fetching client")
-
-const { data:clientData, error:clientError } = await supabase
+const { data:clientData } = await supabase
 .from("clients")
 .select("id")
-.eq("user_id", userId)
+.eq("user_id",userId)
 
-console.log("CLIENT DATA:", clientData)
-console.error("CLIENT ERROR:", clientError)
-
-if(!clientData || clientData.length === 0){
-
-alert("Client not found")
-
-return
-
-}
+console.log("CLIENT DATA",clientData)
 
 const clientId = clientData[0].id
 
-console.log("CLIENT ID:", clientId)
 
 
+/* PROFILES */
 
-/* -----------------------------
-FETCH ACTIVE PROFILES
------------------------------- */
-
-console.log("🔎 Fetching active profiles")
-
-const { data:profiles, error:profileError } = await supabase
+const { data:profiles } = await supabase
 .from("amazon_profiles")
 .select("*")
-.eq("client_id", clientId)
-.eq("is_active", true)
+.eq("client_id",clientId)
+.eq("is_active",true)
 
-console.log("ACTIVE PROFILES:", profiles)
-console.error("PROFILE ERROR:", profileError)
+console.log("ACTIVE PROFILES",profiles)
 
-const switcher = document.getElementById("accountSwitcher")
+const switcher=document.getElementById("accountSwitcher")
 
-if(!profiles || profiles.length === 0){
+profiles.forEach(profile=>{
 
-console.warn("⚠️ No active profiles found")
+const option=document.createElement("option")
 
-switcher.innerHTML = "<option>No profiles activated</option>"
+option.value=profile.profile_id
 
-return
-
-}
-
-
-
-/* -----------------------------
-POPULATE ACCOUNT SWITCHER
------------------------------- */
-
-profiles.forEach(profile => {
-
-console.log("Adding profile:", profile)
-
-const option = document.createElement("option")
-
-option.value = profile.profile_id
-
-option.text = profile.account_name + " (" + profile.country_code + ")"
+option.text=profile.account_name+" ("+profile.country_code+")"
 
 switcher.appendChild(option)
 
@@ -109,41 +71,39 @@ switcher.appendChild(option)
 
 
 
-/* -----------------------------
-SET DEFAULT ACTIVE PROFILE
------------------------------- */
-
-let activeProfile = getActiveProfile()
-
-console.log("Stored active profile:", activeProfile)
+let activeProfile=getActiveProfile()
 
 if(!activeProfile){
 
-activeProfile = profiles[0].profile_id
+activeProfile=profiles[0].profile_id
 
 setActiveProfile(activeProfile)
 
-console.log("Default profile set:", activeProfile)
+}
+
+switcher.value=activeProfile
+
+console.log("ACTIVE PROFILE",activeProfile)
+
+
+
+loadChart()
+
+loadMockKPI()
+
+loadMockTable()
 
 }
 
-switcher.value = activeProfile
 
 
-
-}
-
-
-
-/* -----------------------------
-ACCOUNT SWITCHER CHANGE
------------------------------- */
+/* ACCOUNT SWITCH */
 
 document.getElementById("accountSwitcher").addEventListener("change",(e)=>{
 
-const profileId = e.target.value
+const profileId=e.target.value
 
-console.log("🔁 Profile switched:", profileId)
+console.log("PROFILE SWITCHED",profileId)
 
 setActiveProfile(profileId)
 
@@ -151,19 +111,108 @@ setActiveProfile(profileId)
 
 
 
-/* -----------------------------
-REFRESH BUTTON
------------------------------- */
+/* REFRESH */
 
 document.getElementById("refreshBtn").addEventListener("click",()=>{
 
-console.log("🔄 Refresh clicked")
+console.log("REFRESH CLICKED")
 
-const profile = getActiveProfile()
+loadChart()
 
-console.log("ACTIVE PROFILE:", profile)
+loadMockKPI()
 
 })
+
+
+
+/* KPI MOCK DATA */
+
+function loadMockKPI(){
+
+console.log("Loading KPI data")
+
+document.getElementById("sales").innerText="$12,430"
+
+document.getElementById("spend").innerText="$3,200"
+
+document.getElementById("orders").innerText="210"
+
+document.getElementById("acos").innerText="25.7%"
+
+document.getElementById("tacos").innerText="9.8%"
+
+document.getElementById("clicks").innerText="5,300"
+
+}
+
+
+
+/* CHART */
+
+function loadChart(){
+
+console.log("Loading chart")
+
+const ctx=document.getElementById("performanceChart")
+
+new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+
+datasets:[
+
+{
+label:"Sales",
+data:[120,190,300,250,320,280,350],
+borderColor:"#4CAF50",
+tension:0.3
+},
+
+{
+label:"Spend",
+data:[80,110,150,140,170,160,200],
+borderColor:"#FF9800",
+tension:0.3
+}
+
+]
+
+}
+
+})
+
+}
+
+
+
+/* TABLE */
+
+function loadMockTable(){
+
+console.log("Loading campaign table")
+
+const tbody=document.querySelector("#campaignTable tbody")
+
+tbody.innerHTML=""
+
+const row=document.createElement("tr")
+
+row.innerHTML=`
+<td>Auto Campaign</td>
+<td>$120</td>
+<td>$500</td>
+<td>24%</td>
+<td>300</td>
+<td>40</td>
+`
+
+tbody.appendChild(row)
+
+}
 
 
 
