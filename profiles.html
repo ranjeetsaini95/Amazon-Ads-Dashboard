@@ -53,7 +53,7 @@ const client_id = clientData[0].id
 const { data: profiles, error: profileError } = await supabase
   .from("amazon_profiles")
   .select("*")
-  .eq("client_id", client_id)
+  .eq("client_id", session.user.id)
 
 console.log("PROFILES:", profiles)
 console.log("PROFILE ERROR:", profileError)
