@@ -3,6 +3,7 @@
 
 <head>
 <title>Select Amazon Profiles</title>
+<link rel="icon" href="data:,">
 </head>
 
 <body>
@@ -22,10 +23,9 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js"
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// 1️⃣ Get logged in user
+// 1️⃣ Get logged‑in session
 const { data: { session } } = await supabase.auth.getSession()
-console.log("SESSION:", session)
-console.log("SESSION USER ID:", session.user.id)
+
 if (!session) {
   alert("Please login again")
   window.location.href = "index.html"
@@ -33,27 +33,30 @@ if (!session) {
 
 console.log("SESSION USER:", session.user.id)
 
-// 2️⃣ Get client
-const { data: clientData, error } = await supabase
+// 2️⃣ Find client row
+const { data: clientData, error: clientError } = await supabase
   .from("clients")
-  .select("*")
+  .select("id")
   .eq("user_id", session.user.id)
 
 console.log("CLIENT QUERY RESULT:", clientData)
-console.log("CLIENT QUERY ERROR:", error)
+console.log("CLIENT QUERY ERROR:", clientError)
 
 if (!clientData || clientData.length === 0) {
   alert("Client not found")
-  return
+  throw new Error("Client not found")
 }
 
 const client_id = clientData[0].id
 
-// 3️⃣ Load profiles
-const { data: profiles } = await supabase
+// 3️⃣ Load Amazon profiles
+const { data: profiles, error: profileError } = await supabase
   .from("amazon_profiles")
   .select("*")
   .eq("client_id", client_id)
+
+console.log("PROFILES:", profiles)
+console.log("PROFILE ERROR:", profileError)
 
 const container = document.getElementById("profiles")
 
@@ -82,13 +85,13 @@ document.getElementById("activate").addEventListener("click", async () => {
     return
   }
 
-  // deactivate old profiles
+  // deactivate previous selections
   await supabase
     .from("amazon_profiles")
     .update({ is_active: false })
     .eq("client_id", client_id)
 
-  // activate selected
+  // activate selected profiles
   for (const box of checked) {
 
     await supabase
@@ -98,7 +101,7 @@ document.getElementById("activate").addEventListener("click", async () => {
 
   }
 
-  alert("Profiles activated successfully!")
+  alert("Profiles activated successfully")
 
   window.location.href = "dashboard.html"
 
