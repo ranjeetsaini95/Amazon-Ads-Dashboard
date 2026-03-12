@@ -3,7 +3,7 @@
 
 <head>
 
-<title>Ads Dashboard</title>
+<title>Ads Manager</title>
 
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/dashboard.css">
@@ -20,9 +20,11 @@
 
 <div class="sidebar">
 
-<h2>Ads Manager</h2>
+<div class="logo">
+Ads Manager
+</div>
 
-<ul>
+<ul class="menu">
 
 <li><a href="dashboard.html">Overview</a></li>
 <li><a href="campaign.html">Campaign Performance</a></li>
@@ -44,16 +46,16 @@
 
 <select id="accountSwitcher"></select>
 
-<div class="userMenu">
+<div class="profile">
 
-<button id="userDropdownBtn">Profile ▾</button>
+<button id="profileBtn">Profile ▾</button>
 
-<div id="userDropdown" class="dropdown">
+<div class="dropdown">
 
 <a href="#">User Info</a>
 <a href="#">Manage Accounts</a>
 <a href="#">Delete My Account</a>
-<a href="#" id="logoutBtn">Logout</a>
+<a id="logoutBtn">Logout</a>
 
 </div>
 
@@ -68,45 +70,45 @@
 
 <h1>Overview</h1>
 
-<div class="kpiGrid">
+<div class="kpi-grid">
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>Total Spend</span>
 <h2 id="spend"></h2>
 </div>
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>Ad Sales</span>
 <h2 id="sales"></h2>
 </div>
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>Impressions</span>
 <h2 id="impressions"></h2>
 </div>
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>Clicks</span>
 <h2 id="clicks"></h2>
 </div>
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>Orders</span>
 <h2 id="orders"></h2>
 </div>
 
-<div class="kpiCard">
+<div class="kpi-card">
 <span>CPC</span>
 <h2 id="cpc"></h2>
 </div>
 
-<div class="kpiCard">
-<span>CTR%</span>
+<div class="kpi-card">
+<span>CTR</span>
 <h2 id="ctr"></h2>
 </div>
 
-<div class="kpiCard">
-<span>CVR%</span>
+<div class="kpi-card">
+<span>CVR</span>
 <h2 id="cvr"></h2>
 </div>
 
