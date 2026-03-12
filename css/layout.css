@@ -64,3 +64,72 @@ border-bottom:1px solid #ddd;
 padding:25px;
 overflow:auto;
 }
+.profile-menu{
+position:relative;
+}
+
+.profile-btn{
+display:flex;
+align-items:center;
+gap:10px;
+background:white;
+border:1px solid #ddd;
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.avatar{
+width:30px;
+height:30px;
+border-radius:50%;
+background:#4CAF50;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+}
+
+.username{
+font-size:14px;
+}
+
+.profile-dropdown{
+
+display:none;
+position:absolute;
+right:0;
+top:45px;
+
+background:white;
+border:1px solid #ddd;
+border-radius:8px;
+
+width:220px;
+
+box-shadow:0 10px 20px rgba(0,0,0,0.15);
+
+flex-direction:column;
+
+z-index:1000;
+
+}
+
+.profile-dropdown a{
+display:block;
+padding:10px 15px;
+text-decoration:none;
+color:#333;
+font-size:14px;
+}
+
+.profile-dropdown a:hover{
+background:#f3f4f6;
+}
+
+.dropdown-header{
+padding:10px 15px;
+font-size:13px;
+color:#666;
+}
