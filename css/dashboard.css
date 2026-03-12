@@ -83,22 +83,6 @@ padding:20px;
 border-radius:8px;
 box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-padding:10px;
-text-align:left;
-border-bottom:1px solid #eee;
-}
-
-th{
-background:#fafafa;
-}
-
 .kpi-grid{
 display:grid;
 grid-template-columns:repeat(4,1fr);
@@ -122,3 +106,19 @@ font-size:14px;
 margin-top:8px;
 font-size:26px;
 }
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+text-align:left;
+border-bottom:1px solid #eee;
+}
+
+th{
+background:#fafafa;
+}
+
