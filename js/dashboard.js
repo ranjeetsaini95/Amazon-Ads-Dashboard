@@ -38,7 +38,54 @@ const clientId = clientData[0].id
 
 console.log("CLIENT",clientId)
 
+async function loadAccountSwitcher(){
 
+const { data:{ session } } = await supabase.auth.getSession()
+
+if(!session){
+window.location.href = "index.html"
+return
+}
+
+const userId = session.user.id
+
+/* get client */
+
+const { data:client } = await supabase
+.from("clients")
+.select("id")
+.eq("user_id",userId)
+.single()
+
+const clientId = client.id
+
+/* get active profiles */
+
+const { data:profiles } = await supabase
+.from("amazon_profiles")
+.select("*")
+.eq("client_id",clientId)
+.eq("is_active",true)
+
+const switcher = document.getElementById("accountSwitcher")
+
+switcher.innerHTML = ""
+
+profiles.forEach(profile => {
+
+const option = document.createElement("option")
+
+option.value = profile.profile_id
+option.text =
+profile.account_name + " (" + profile.country_code + ")"
+
+switcher.appendChild(option)
+
+})
+
+}
+
+loadAccountSwitcher()
 /* LOAD PROFILES */
 
 const { data:profiles } = await supabase
