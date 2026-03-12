@@ -313,3 +313,23 @@ loadDashboardData()
 
 
 loadDashboard()
+
+const profileBtn = document.getElementById("profileBtn")
+const dropdown = document.getElementById("profileDropdown")
+
+if(profileBtn){
+
+profileBtn.addEventListener("click",(e)=>{
+
+e.stopPropagation()
+
+dropdown.style.display =
+dropdown.style.display === "block" ? "none" : "block"
+
+})
+
+window.addEventListener("click",()=>{
+dropdown.style.display = "none"
+})
+
+}
